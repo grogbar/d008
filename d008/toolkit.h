@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <stdio.h>
 #include <direct.h>
+#include <qstring.h>
 
 int icompare(std::string s1, std::string s2);
 std::string upper(std::string);
 std::string lower(std::string);
 std::string trim(const std::string& str, const std::string& whitespace = " \t\r\n"); // default whitespace = " \t\r\n"
+template <typename T>T trim(const T& str, const T& whitespace = " \t\r\n");
 std::string GetCurrentWorkingDir(void);
 

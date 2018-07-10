@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>919</width>
-    <height>346</height>
+    <width>911</width>
+    <height>499</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,13 +18,6 @@
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -32,6 +25,34 @@
            <widget class="QPushButton" name="pushButtonRun">
             <property name="text">
              <string>Run</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStage">
+            <property name="text">
+             <string>Stage</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonInstall">
+            <property name="text">
+             <string>Install</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonUninstall">
+            <property name="text">
+             <string>Uninstall</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonLogs">
+            <property name="text">
+             <string>Logs</string>
             </property>
            </widget>
           </item>
@@ -63,13 +84,37 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_Actions">
+           <layout class="QVBoxLayout" name="verticalLayout_Objects">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QPushButton" name="pushButtonProfiles">
+               <widget class="QPushButton" name="pushButtonGroups">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Profiles</string>
+                 <string>Groups</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -78,6 +123,12 @@
                 <property name="text">
                  <string>Packages</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -85,12 +136,21 @@
                 <property name="text">
                  <string>Tools</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonAll">
                 <property name="text">
                  <string>All</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -110,10 +170,16 @@
              </layout>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEditAction"/>
+             <widget class="QLineEdit" name="lineEditObject"/>
             </item>
             <item>
-             <widget class="QTreeWidget" name="treeWidgetActions">
+             <widget class="QTreeWidget" name="treeWidgetObjects">
+              <property name="sortingEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="headerHidden">
+               <bool>true</bool>
+              </property>
               <column>
                <property name="text">
                 <string notr="true">1</string>
@@ -139,12 +205,18 @@
                 <property name="text">
                  <string>AD</string>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonFiles">
                 <property name="text">
                  <string>Files</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -167,7 +239,29 @@
              <widget class="QLineEdit" name="lineEditComputer"/>
             </item>
             <item>
-             <widget class="QListWidget" name="listWidgetTargets"/>
+             <widget class="QListWidget" name="listWidgetTargets">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Sunken</enum>
+              </property>
+              <property name="lineWidth">
+               <number>2</number>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -183,13 +277,87 @@
        </widget>
       </item>
       <item>
-       <widget class="QTreeView" name="treeViewJobs"/>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QRadioButton" name="radialGroups">
+            <property name="text">
+             <string>Groups</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radialPackages">
+            <property name="text">
+             <string>Packages</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="value">
+           <number>24</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="treeWidgetJobs">
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="Line" name="line_1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>198</width>
+           <height>424</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </item>
       <item>
@@ -211,7 +379,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>919</width>
+     <width>911</width>
      <height>21</height>
     </rect>
    </property>
@@ -226,7 +394,7 @@
      <string>Settings</string>
     </property>
     <addaction name="actionPreferences"/>
-    <addaction name="actionActions"/>
+    <addaction name="actionObjects"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -234,7 +402,19 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuObjects">
+    <property name="title">
+     <string>Objects</string>
+    </property>
+    <addaction name="actionCheck"/>
+    <addaction name="actionStage"/>
+    <addaction name="actionInstall"/>
+    <addaction name="actionUninstall"/>
+    <addaction name="actionStageInstall"/>
+    <addaction name="actionLogs"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuObjects"/>
    <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -252,9 +432,9 @@
     <string>Preferences</string>
    </property>
   </action>
-  <action name="actionActions">
+  <action name="actionObjects">
    <property name="text">
-    <string>Actions</string>
+    <string>Objects</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -267,27 +447,59 @@
     <string>E&amp;xit</string>
    </property>
   </action>
+  <action name="actionCheck">
+   <property name="text">
+    <string>0 Check</string>
+   </property>
+  </action>
+  <action name="actionStage">
+   <property name="text">
+    <string>1 Stage</string>
+   </property>
+  </action>
+  <action name="actionInstall">
+   <property name="text">
+    <string>2 Install</string>
+   </property>
+  </action>
+  <action name="actionUninstall">
+   <property name="text">
+    <string>3 Uninstall</string>
+   </property>
+  </action>
+  <action name="actionStageInstall">
+   <property name="text">
+    <string>4 Stage &amp; Install</string>
+   </property>
+  </action>
+  <action name="actionLogs">
+   <property name="text">
+    <string>Logs</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>lineEditObject</tabstop>
+  <tabstop>treeWidgetObjects</tabstop>
+  <tabstop>lineEditComputer</tabstop>
+  <tabstop>listWidgetTargets</tabstop>
+  <tabstop>pushButtonRun</tabstop>
+  <tabstop>pushButtonStage</tabstop>
+  <tabstop>pushButtonInstall</tabstop>
+  <tabstop>pushButtonUninstall</tabstop>
+  <tabstop>pushButtonLogs</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>lineEditCmd</tabstop>
+  <tabstop>pushButtonGroups</tabstop>
+  <tabstop>pushButtonPackages</tabstop>
+  <tabstop>pushButtonTools</tabstop>
+  <tabstop>pushButtonAll</tabstop>
+  <tabstop>pushButtonAD</tabstop>
+  <tabstop>pushButtonFiles</tabstop>
+ </tabstops>
  <resources>
   <include location="d008.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>treeWidgetActions</sender>
-   <signal>clicked(QModelIndex)</signal>
-   <receiver>lineEditCmd</receiver>
-   <slot>paste()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>154</x>
-     <y>236</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>280</x>
-     <y>84</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

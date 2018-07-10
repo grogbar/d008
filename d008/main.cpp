@@ -1,6 +1,5 @@
 #include <QtWidgets/QApplication>
 #include "d008.h"
-#include "action.h"
 
 
 int main(int argc, char *argv[])

@@ -1,12 +1,12 @@
 //#include "stdafx.h"
-#include "action.h"
+#include "object.h"
 #include "toolkit.h"
 
 // Defining static vars
-//std::vector<std::string> Action::vConfigData;
-//std::vector<std::string> Action::vActionData;
+//QVector<QString> Object::vConfigData;
+//QVector<QString> Object::vObjectData;
 
-bool isList(std::string str) {
+bool isList(QString str) {
 	unsigned i = 0;
 	if (str.at(0) == '#' || str.at(0) == ';') return false; // I'm a comment
 	while (str.at(i) != '=' && i < str.length() - 2) { i++; }
@@ -17,37 +17,41 @@ bool isList(std::string str) {
 }
 
 
-Action::Action()
+Object::Object()
 {
-	std::vector<std::string> vActionData;
+	QVector<QString> vObjectData;
 }
 
-Action::~Action()
+Object::~Object()
 {
 }
 
 
-int Action::read_actions(const std::string FileName) {
-	std::ifstream actionFile(FileName);
+int Object::read(const QString FileName) {
+	QString line;
+	QFile file(FileName);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qInfo() << "I can't open the frackin file: config.ini. " << file.errorString() << '\n';
+		return 2;
+	}
 
-
-	std::string line;
-	while (std::getline(actionFile, line))
-	{
-		vActionData.push_back( trim(line) );
+	QTextStream in(&file);
+	while (!in.atEnd()) {
+		line = in.readLine().trimmed();
+		vObjectData.push_back( line );
 	}
 	return 0;
 }
 
-int Action::write_actions(const std::string FileName) {
-	// Add blank line between actions
-	for (auto i : vActions) {
+int Object::write(const QString FileName) {
+	// Add blank line between objects
+	for (auto i : vObjects) {
 		
 	}
 	return 0;
 }
 
-bool Action::parse_sList(std::vector<std::string> &list, const std::string linein, bool flag_inList) {
+bool Object::parse_sList(QVector<QString> &list, const QString linein, bool flag_inList) {
 	bool flag_q = false;  // '
 	bool flag_qq = false;  // "
 	bool flag_br = false;  // []
@@ -55,7 +59,7 @@ bool Action::parse_sList(std::vector<std::string> &list, const std::string linei
 	bool flag_quoted = false; // were quotes used?
 	int start = 0;
 	int end = 0;
-	std::string line = trim(linein);
+	QString line = linein.trimmed();
 	for (unsigned i = 0; i<line.length(); i++)
 	{
 		if (!flag_inList && line.at(i) == '(' ) {
@@ -105,7 +109,7 @@ bool Action::parse_sList(std::vector<std::string> &list, const std::string linei
 		// find separators
 		else if (!flag_inquotes && (line.at(i) == ',' || line.at(i) == ';')) { // comma or semicolon separated values
 			if (!flag_quoted) end = i-1;
-			if (i & end - start + 1>0) list.push_back(line.substr(start, end - start + 1 ));
+			if (i & end - start + 1>0) list.push_back(line.mid(start, end - start + 1 ));
 
 			start = i + 1;
 			flag_quoted = false;
@@ -114,21 +118,21 @@ bool Action::parse_sList(std::vector<std::string> &list, const std::string linei
 		else if ( !flag_inquotes && line.at(i) == ')') {
 			if (!flag_quoted) end = i-1;
 			flag_inList = false;
-			if (i & end-start+1>0) list.push_back(line.substr(start, end - start +1));  // if first char is not ')'
+			if (i & end-start+1>0) list.push_back(line.mid(start, end - start +1));  // if first char is not ')'
 		}
 		else if (i == line.length() - 1) {
 			end = i-1;
-			if (i && end - start + 1>0) list.push_back(line.substr(start, end - start + 1));
+			if (i && end - start + 1>0) list.push_back(line.mid(start, end - start + 1));
 		}
 
 	}
 	return flag_inList;
 }
 
-bool Action::parse_nList(std::vector<int> &list, const std::string line, bool flag_inList) {
+bool Object::parse_nList(QVector<int> &list, const QString line, bool flag_inList) {
 	unsigned start = 0;
 	unsigned end = 0;
-	size_t sz;//std::string::size_type sz
+	size_t sz;//QString::size_type sz
 	for (unsigned i = 0; i<line.length(); ++i)
 	{
 		if (!flag_inList && line.at(i) == '(') {
@@ -137,31 +141,31 @@ bool Action::parse_nList(std::vector<int> &list, const std::string line, bool fl
 		}
 		else if (!flag_inList) {} // Do nothing until list starts.
 		else if (line.at(i) == ',' || line.at(i) == ';') {
-			list.push_back(std::stoi(line.substr(start, end - start + 1),&sz));
+			list.push_back(line.mid(start, end - start + 1).toInt());
 			start = i + 1;
 		}
 		else if (flag_inList && line.at(i) == ')') {
 			flag_inList = false;
-			list.push_back(std::stoi(line.substr(start, end - start + 1), &sz));
+			list.push_back(line.mid(start, end - start + 1).toInt());
 		}
 
 	}
 	return flag_inList;
 }
 
-int Action::parse_actions() {
+int Object::parse() {
 	enum lists { NONE, ACTIONS, INSTALL, UNINSTALL, PREREQUISITES, POSTREQUISITES, SUCCESS, INSTALLED, COMMENT };
 	lists listType = NONE;
-	action_t newObject = {};
-	action_defaults(newObject);
+	object_t newObject = {};
+	object_defaults(newObject);
 	bool inList = false;
-	size_t sz;    //std::string::size_type sz
-	std::string temp = "source=";
+	size_t sz;    //QString::size_type sz
+	QString temp = "source=";
 	int testing = 0;
-	for (auto data : Action::vActionData) {
-		//std::cout << i << std::endl;
+	for (auto data : Object::vObjectData) {
+		//qInfo() << i << '\n';
 		// Recover from bad package by assuming end of package after blank line
-		// if '[' and not in list then start of action.  Save index as we can't start loading 
+		// if '[' and not in list then start of object.  Save index as we can't start loading 
 
 		if (data.length() == 0) {
 			// save record
@@ -183,7 +187,7 @@ int Action::parse_actions() {
 		}
 		else if (inList) {
 			switch (listType) {
-			case ACTIONS:        inList = parse_sList(newObject.actions, data, true); break;
+			case ACTIONS:        inList = parse_sList(newObject.objects, data, true); break;
 			case INSTALL:        inList = parse_sList(newObject.install, data, true); break;
 			case UNINSTALL:      inList = parse_sList(newObject.uninstall, data, true); break;
 			case PREREQUISITES:  inList = parse_sList(newObject.prerequisites, data, true); break;
@@ -209,73 +213,73 @@ int Action::parse_actions() {
 					listType = NONE;
 					inList = false;
 				}
-				newObject.title = data.substr(1, data.length() - 2);
+				newObject.title = data.mid(1, data.length() - 2);
 			}
-			else if (!icompare(data.substr(0, 7), std::string("source="))) {
-				newObject.source = data.substr(7, (data.length() - 7));
+			else if (data.left(7).toLower() == "source=") {
+				newObject.source = data.mid(7, (data.length() - 7));
 			}
-			else if (!icompare(data.substr(0, 11), std::string("packagenum="))) {
-				newObject.packageNum = std::stoi(data.substr(11, data.length()-11), &sz);
+			else if (data.left(11).toLower() == "packagenum=") { //Keep this unique as it becomes a directory name
+				newObject.packageNum = data.mid(11, data.length()-11).toInt();
 			}
-			else if (!icompare(data.substr(0, 6), std::string("shell="))) {
-				newObject.shell = data.substr(7, (data.length() - 8));
+			else if (data.left(6).toLower() == "shell=") {
+				newObject.shell = data.mid(7, (data.length() - 8));
 			}
-			else if (!icompare(data.substr(0, 9), std::string("category="))) {
-				newObject.category = data.substr(10, (data.length() - 11));
+			else if (data.left(10).toLower() == "category=") {
+				newObject.category = data.mid(10, (data.length() - 11));
 			}
-			else if (!icompare(data.substr(0, 8), std::string("command="))) {
-				newObject.command = data.substr(9, (data.length() - 10));
+			else if (data.left(9).toLower() == "command=") {
+				newObject.command = data.mid(9, (data.length() - 10));
 			}
-			else if (!icompare(data.substr(0, 5), std::string("type="))) {
-				if      (data.find("tool")    < std::string::npos) { newObject.type = TOOL; }
-				else if (data.find("package") < std::string::npos) { newObject.type = PACKAGE; }
-				else if (data.find("group")   < std::string::npos) { newObject.type = GROUP; }
-				else if (data.find("shell")   < std::string::npos) { newObject.type = SHELL; }
-				else if (data.find("os")      < std::string::npos) { newObject.type = OS; }
+			else if (data.left(5).toLower() == "type=") {
+				if      (data.contains("tool")) { newObject.type = TOOL; }
+				else if (data.contains("package")) { newObject.type = PACKAGE; }
+				else if (data.contains("group")  ) { newObject.type = GROUP; }
+				else if (data.contains("shell")  ) { newObject.type = SHELL; }
+				else if (data.contains("os")     ) { newObject.type = OS; }
 				else { newObject.type = PACKAGE; }
 			}
-			else if (!icompare(data.substr(0, 16), std::string("expectedruntime="))) {
+			else if (data.left(16).toLower() == "expectedruntime=") {
 			}
-			else if (!icompare(data.substr(0, 14), std::string("failedruntime="))) {
+			else if (data.left(14).toLower() == "failedruntime=") {
 			}
-			else if (!icompare(data.substr(0, 8), std::string("enabled="))) {
+			else if (data.left(8).toLower() == "enabled=") {
 				if (data.at(8) == '0') newObject.enabled = false;
 				else newObject.enabled = true;
 			}
-			else if (!icompare(data.substr(0, 10), std::string("installed="))) {
-				newObject.installed.push_back(data.substr(10, (data.length() - 10)));
+			else if (data.left(10).toLower() == "installed=") {
+				newObject.installed.push_back(data.mid(10, (data.length() - 10)));
 			}
 		}
-		else if (!icompare(data.substr(0, 8), std::string("actions=")) || listType == ACTIONS) {
+		else if (data.left(8).toLower() == "objects=" || listType == ACTIONS) {
 			listType = ACTIONS;
-			inList = parse_sList(newObject.actions, data.substr(8, data.length() - 8), false);
+			inList = parse_sList(newObject.objects, data.mid(8, data.length() - 8), false);
 		}
-		else if (!icompare(data.substr(0, 13), std::string("uninstallcmd=")) || listType == UNINSTALL) {
+		else if (data.left(13).toLower() == "uninstallcmd=" || listType == UNINSTALL) {
 			listType = UNINSTALL;
-			inList = parse_sList(newObject.uninstall, data.substr(13, data.length() - 13), false);
+			inList = parse_sList(newObject.uninstall, data.mid(13, data.length() - 13), false);
 		}
-		else if (!icompare(data.substr(0, 11), std::string("installcmd=")) || listType == INSTALL ) {
+		else if (data.left(11).toLower() == "installcmd=" || listType == INSTALL ) {
 			listType = INSTALL;
-			inList = parse_sList(newObject.install, data.substr(11, data.length() - 11), false);
+			inList = parse_sList(newObject.install, data.mid(11, data.length() - 11), false);
 		}
-		else if (!icompare(data.substr(0,14), std::string("prerequisites=")) || listType == PREREQUISITES) {
+		else if (data.left(14).toLower() == "prerequisites=" || listType == PREREQUISITES) {
 			listType = PREREQUISITES;
-			inList = parse_sList(newObject.prerequisites, data.substr(14, data.length() - 14), false);
+			inList = parse_sList(newObject.prerequisites, data.mid(14, data.length() - 14), false);
 		}
-		else if (!icompare(data.substr(0,15), std::string("postrequisites=")) || listType == POSTREQUISITES) {
+		else if (data.left(15).toLower() == "postrequisites=" || listType == POSTREQUISITES) {
 			listType = POSTREQUISITES;
-			inList = parse_sList(newObject.postrequisites, data.substr(15, data.length() - 15), false);
+			inList = parse_sList(newObject.postrequisites, data.mid(15, data.length() - 15), false);
 		}
-		else if (!icompare(data.substr(0, 7), std::string("sucess=")) || listType == SUCCESS) {
+		else if (data.left(7).toLower() == "sucess=" || listType == SUCCESS) {
 			listType = SUCCESS;
-			inList = parse_nList(newObject.success, data.substr(7, data.length() - 7), false);
+			inList = parse_nList(newObject.success, data.mid(7, data.length() - 7), false);
 		}
-		else if (!icompare(data.substr(0,10), std::string("installed=")) || listType == INSTALLED) {
+		else if (data.left(10).toLower() == "installed=" || listType == INSTALLED) {
 			listType = INSTALLED;
-			inList = parse_sList(newObject.installed, data.substr(10, data.length() - 10), false);
+			inList = parse_sList(newObject.installed, data.mid(10, data.length() - 10), false);
 		}
 		else {
-			std::cout << "????: " << data << std::endl;
+			qInfo() << "????: " << data << '\n';
 			std::cin.get(); 
 			exit(0);
 		}
@@ -292,114 +296,114 @@ int Action::parse_actions() {
 	return 0;
 }
 
-void Action::print_action_t(const action_t all) {
-	if (!all.title.empty())		std::cout << "\n[" << all.title << "]" << std::endl;
-	if (all.type) std::cout << "    type=" << all.type << std::endl;
-	if (!all.source.empty())		std::cout << "    source=\"" << all.source << "\"" << std::endl;
-	if (all.packageNum)	std::cout << "    packageNum=" << all.packageNum << std::endl;
-	if (!all.actions.empty()) {
-		std::cout << "    actions=(";
+void Object::print_object_t(const object_t all) {
+	if (!all.title.isEmpty())		qInfo() << "\n[" << all.title << "]" << '\n';
+	if (all.type) qInfo() << "    type=" << all.type << '\n';
+	if (!all.source.isEmpty())		qInfo() << "    source=\"" << all.source << "\"" << '\n';
+	if (all.packageNum)	qInfo() << "    packageNum=" << all.packageNum << '\n';
+	if (!all.objects.isEmpty()) {
+		qInfo() << "    objects=(";
 		int i = 0;
-		for (auto e : all.actions) {
-			if (i) std::cout << ",";
-			std::cout << "[" << e << "]";
+		for (auto e : all.objects) {
+			if (i) qInfo() << ",";
+			qInfo() << "[" << e << "]";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
 	if (!all.install.empty()) {
-		std::cout << "    installcmd=(";
+		qInfo() << "    installcmd=(";
 		int i = 0;
 		for (auto e : all.install) {
-			if (i) std::cout << ",";
-			std::cout << e ;
+			if (i) qInfo() << ",";
+			qInfo() << e ;
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
 	if (!all.uninstall.empty())	{
-		std::cout << "    uninstall=(";
+		qInfo() << "    uninstall=(";
 		int i = 0;
 		for (auto e : all.uninstall) {
-			if (i) std::cout << ",";
-			std::cout << "\"" << e << "\"";
+			if (i) qInfo() << ",";
+			qInfo() << "\"" << e << "\"";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
 	if (!all.prerequisites.empty())	{
-		std::cout << "    prerequisites=(";
+		qInfo() << "    prerequisites=(";
 		int i = 0;
 		for (auto e : all.prerequisites) {
-			if (i) std::cout << ",";
-			std::cout << "\"" << e << "\"";
+			if (i) qInfo() << ",";
+			qInfo() << "\"" << e << "\"";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
 	if (!all.postrequisites.empty()) {
-		std::cout << "    postrequisites=(";
+		qInfo() << "    postrequisites=(";
 		int i = 0;
 		for (auto e : all.postrequisites) {
-			if (i) std::cout << ",";
-			std::cout << "\"" << e << "\"";
+			if (i) qInfo() << ",";
+			qInfo() << "\"" << e << "\"";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
-	if (!all.enabled)			std::cout << "    enabled=false" << std::endl;
-	else						std::cout << "    enabled=true" << std::endl;
+	if (!all.enabled)			qInfo() << "    enabled=false" << '\n';
+	else						qInfo() << "    enabled=true" << '\n';
 	if (!all.success.empty())	{
-		std::cout << "    success=(";
+		qInfo() << "    success=(";
 		int i = 0;
 		for (auto e : all.success) {
-			if (i) std::cout << ",";
-			std::cout << "\"" << e << "\"";
+			if (i) qInfo() << ",";
+			qInfo() << "\"" << e << "\"";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
 	if (!all.expectedRuntime)
-		std::cout << "    expectedRuntime=(" << all.expectedRuntime << ")" << std::endl;
+		qInfo() << "    expectedRuntime=(" << all.expectedRuntime << ")" << '\n';
 	if (!all.failedRuntime)
-		std::cout << "    failedRuntime=" << all.failedRuntime << std::endl;
-	if (!all.shell.empty())
-		std::cout << "shell=" << all.shell << std::endl;
+		qInfo() << "    failedRuntime=" << all.failedRuntime << '\n';
+	if (!all.shell.isEmpty())
+		qInfo() << "shell=" << all.shell << '\n';
 	if (!all.installed.empty())	{
-		std::cout << "    installed=(";
+		qInfo() << "    installed=(";
 		int i = 0;
 		for (auto e : all.installed) {
-			if (i) std::cout << ",";
-			std::cout << "\"" << e << "\"";
+			if (i) qInfo() << ",";
+			qInfo() << "\"" << e << "\"";
 			i++;
 		}
-		std::cout << ")" << std::endl;
+		qInfo() << ")" << '\n';
 	}
-	if (!all.category.empty())	std::cout << "    category=(" << all.category << std::endl;
-	if (!all.command.empty())	std::cout << "    command=" << all.command << std::endl;
-	if (!all.comment.empty())	{
+	if (!all.category.isEmpty())	qInfo() << "    category=(" << all.category << '\n';
+	if (!all.command.isEmpty())	qInfo() << "    command=" << all.command << '\n';
+	if (!all.comment.isEmpty())	{
 		for (auto e : all.comment) {
-			std::cout  <<  e << std::endl;
+			qInfo()  <<  e << '\n';
 		}
 	}
-	if (!all.index)				std::cout << "    index=" << all.index << std::endl;
+	if (!all.index)				qInfo() << "    index=" << all.index << '\n';
 }
 
-void Action::load_shell(const action_t obj){
+void Object::load_shell(const object_t obj){
 	shell_t s;
 	//s.title = obj.title;
 	s.shell = obj.shell;
 	s.index = obj.index;
 	shells[obj.title] = s;
 }
-void Action::load_group(const action_t obj){
+void Object::load_group(const object_t obj){
 	group_t g;
 	//g.title = obj.title;
-	g.actions = obj.actions;
+	g.objects = obj.objects;
 	g.index = obj.index;
 	groups[obj.title] = g;
 }
-void Action::load_package(const action_t obj){
+void Object::load_package(const object_t obj){
 
 	package_t p;
 	//p.title = obj.title;
@@ -419,7 +423,7 @@ void Action::load_package(const action_t obj){
 
 	packages[obj.title] = p;
 }
-void Action::load_tool(const action_t obj){
+void Object::load_tool(const object_t obj){
 	tool_t t;
 	//t.title = obj.title;
 	t.shell = obj.shell;
@@ -431,12 +435,12 @@ void Action::load_tool(const action_t obj){
 	t.postrequisites = obj.postrequisites;
 	tools[obj.title] = t;
 }
-void Action::load_comments(const action_t obj) {
+void Object::load_comments(const object_t obj) {
 	comment_t c;
 	c.comment = obj.comment;
 	c.index = obj.index;
 }
-void Action::action_defaults(action_t &o) {
+void Object::object_defaults(object_t &o) {
 	o.type = NONE;
 	o.enabled = true;
 	o.expectedRuntime = 300;
@@ -444,8 +448,8 @@ void Action::action_defaults(action_t &o) {
 }
 
 /*private:
-	std::vector<std::string> vConfigData;
-	std::vector<std::string> vActionData;
+	QVector<QString> vConfigData;
+	QVector<QString> vObjectData;
 
 
 
