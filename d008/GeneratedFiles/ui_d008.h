@@ -29,7 +29,6 @@
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
-#include <QtWidgets/QTreeView>
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -87,7 +86,7 @@ public:
     QRadioButton *radialPackages;
     QSpacerItem *horizontalSpacer_4;
     QProgressBar *progressBar;
-    QTreeView *treeViewJobs;
+    QTreeWidget *treeWidgetJobs;
     QFrame *line_1;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
@@ -346,10 +345,13 @@ public:
 
         verticalLayout_2->addWidget(progressBar);
 
-        treeViewJobs = new QTreeView(centralWidget);
-        treeViewJobs->setObjectName(QStringLiteral("treeViewJobs"));
+        treeWidgetJobs = new QTreeWidget(centralWidget);
+        QTreeWidgetItem *__qtreewidgetitem1 = new QTreeWidgetItem();
+        __qtreewidgetitem1->setText(0, QStringLiteral("1"));
+        treeWidgetJobs->setHeaderItem(__qtreewidgetitem1);
+        treeWidgetJobs->setObjectName(QStringLiteral("treeWidgetJobs"));
 
-        verticalLayout_2->addWidget(treeViewJobs);
+        verticalLayout_2->addWidget(treeWidgetJobs);
 
 
         horizontalLayout->addLayout(verticalLayout_2);

@@ -62,7 +62,7 @@ int d008::init() {
 	ui.pushButtonPackages->setFont(fontBold);
 	ui.pushButtonTools->setFont(fontBold);
 	ui.listWidgetTargets->setSelectionMode(QAbstractItemView::MultiSelection);
-
+	q.init_tree();
 	// Instantiate Q
 	// q = Q( objects , ui );  // in header?
 
@@ -366,7 +366,7 @@ void d008::on_treeWidgetObjects_itemSelectionChanged(void) {
 	}
 }
 void d008::on_listWidgetTargets_itemSelectionChanged() {
-	targets = {};
+	targets.clear();
 	foreach(QListWidgetItem* item, ui.listWidgetTargets->selectedItems())
 		targets += item->text();
 	qDebug() << targets;

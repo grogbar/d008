@@ -3,8 +3,8 @@
 #include "toolkit.h"
 
 // Defining static vars
-//QVector<QString> Object::vConfigData;
-//QVector<QString> Object::vObjectData;
+//QStringList Object::vConfigData;
+//QStringList Object::vObjectData;
 
 bool isList(QString str) {
 	unsigned i = 0;
@@ -19,7 +19,7 @@ bool isList(QString str) {
 
 Object::Object()
 {
-	QVector<QString> vObjectData;
+	QStringList vObjectData;
 }
 
 Object::~Object()
@@ -51,7 +51,7 @@ int Object::write(const QString FileName) {
 	return 0;
 }
 
-bool Object::parse_sList(QVector<QString> &list, const QString linein, bool flag_inList) {
+bool Object::parse_sList(QStringList &list, const QString linein, bool flag_inList) {
 	bool flag_q = false;  // '
 	bool flag_qq = false;  // "
 	bool flag_br = false;  // []
@@ -78,7 +78,7 @@ bool Object::parse_sList(QVector<QString> &list, const QString linein, bool flag
 		else if (flag_q && line.at(i) == '\'' && line.at(i - 1) != '\\') { // exit single quote
 			flag_q = false;
 			flag_inquotes = false;
-			end = i;
+			end = i-1;
 		}
 		// double quotes
 		else if (!flag_inquotes && line.at(i) == '"') { //enter double quote
@@ -107,9 +107,11 @@ bool Object::parse_sList(QVector<QString> &list, const QString linein, bool flag
 			end = i - 1;
 		}
 		// find separators
-		else if (!flag_inquotes && (line.at(i) == ',' || line.at(i) == ';')) { // comma or semicolon separated values
+		else if (!flag_inquotes && (line.at(i) == ',' || line.at(i) == ';' || line.at(i) == ')')) { // comma or semicolon separated values
 			if (!flag_quoted) end = i-1;
-			if (i & end - start + 1>0) list.push_back(line.mid(start, end - start + 1 ));
+			if (i && (end - start + 1>0)) 
+				list.push_back(line.mid(start, end - start + 1 ));
+			if (line.at(i) == ')') flag_inList = false;
 
 			start = i + 1;
 			flag_quoted = false;
@@ -140,13 +142,11 @@ bool Object::parse_nList(QVector<int> &list, const QString line, bool flag_inLis
 			start = i + 1;
 		}
 		else if (!flag_inList) {} // Do nothing until list starts.
-		else if (line.at(i) == ',' || line.at(i) == ';') {
+		else if (line.at(i) == ',' || line.at(i) == ';' || line.at(i) ==')') {
+			end = i - 1;
 			list.push_back(line.mid(start, end - start + 1).toInt());
+			flag_inList = (line.at(i) == ')') ? false : true;
 			start = i + 1;
-		}
-		else if (flag_inList && line.at(i) == ')') {
-			flag_inList = false;
-			list.push_back(line.mid(start, end - start + 1).toInt());
 		}
 
 	}
@@ -250,38 +250,37 @@ int Object::parse() {
 				newObject.installed.push_back(data.mid(10, (data.length() - 10)));
 			}
 		}
-		else if (data.left(8).toLower() == "objects=" || listType == ACTIONS) {
-			listType = ACTIONS;
+		else if (data.left(8).toLower() == "objects=" || inList && listType == ACTIONS) {
 			inList = parse_sList(newObject.objects, data.mid(8, data.length() - 8), false);
+			listType = ACTIONS;
 		}
-		else if (data.left(13).toLower() == "uninstallcmd=" || listType == UNINSTALL) {
-			listType = UNINSTALL;
+		else if (data.left(13).toLower() == "uninstallcmd=" || inList && listType == UNINSTALL) {
 			inList = parse_sList(newObject.uninstall, data.mid(13, data.length() - 13), false);
+			listType = UNINSTALL;
 		}
-		else if (data.left(11).toLower() == "installcmd=" || listType == INSTALL ) {
-			listType = INSTALL;
+		else if (data.left(11).toLower() == "installcmd=" || inList && listType == INSTALL ) {
 			inList = parse_sList(newObject.install, data.mid(11, data.length() - 11), false);
+			listType = INSTALL;
 		}
-		else if (data.left(14).toLower() == "prerequisites=" || listType == PREREQUISITES) {
-			listType = PREREQUISITES;
+		else if (data.left(14).toLower() == "prerequisites=" || inList && listType == PREREQUISITES) {
 			inList = parse_sList(newObject.prerequisites, data.mid(14, data.length() - 14), false);
+			listType = PREREQUISITES;
 		}
-		else if (data.left(15).toLower() == "postrequisites=" || listType == POSTREQUISITES) {
-			listType = POSTREQUISITES;
+		else if (data.left(15).toLower() == "postrequisites=" || inList && listType == POSTREQUISITES) {
 			inList = parse_sList(newObject.postrequisites, data.mid(15, data.length() - 15), false);
+			listType = POSTREQUISITES;
 		}
-		else if (data.left(7).toLower() == "sucess=" || listType == SUCCESS) {
-			listType = SUCCESS;
+		else if (data.left(8).toLower() == "success=" || inList && listType == SUCCESS) {
 			inList = parse_nList(newObject.success, data.mid(7, data.length() - 7), false);
+			listType = SUCCESS;
 		}
-		else if (data.left(10).toLower() == "installed=" || listType == INSTALLED) {
-			listType = INSTALLED;
+		else if (data.left(10).toLower() == "installed=" || inList && listType == INSTALLED) {
 			inList = parse_sList(newObject.installed, data.mid(10, data.length() - 10), false);
+			listType = INSTALLED;
 		}
 		else {
+			qDebug() << "NOT FOUND:" << data << '\n';
 			qInfo() << "????: " << data << '\n';
-			std::cin.get(); 
-			exit(0);
 		}
 	}
 	// save the last object 
@@ -412,6 +411,7 @@ void Object::load_package(const object_t obj){
 	p.install = obj.install;
 	p.uninstall = obj.uninstall;
 	p.prerequisites = obj.prerequisites;
+	p.postrequisites = obj.postrequisites;
 	p.enabled = obj.enabled;
 	p.success = obj.success;
 	p.expectedRuntime = obj.expectedRuntime;
@@ -448,8 +448,8 @@ void Object::object_defaults(object_t &o) {
 }
 
 /*private:
-	QVector<QString> vConfigData;
-	QVector<QString> vObjectData;
+	QStringList vConfigData;
+	QStringList vObjectData;
 
 
 

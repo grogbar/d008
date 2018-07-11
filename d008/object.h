@@ -26,7 +26,7 @@ struct os_t {
 	QString					remote;
 	QString					cp;
 	bool						enabled;
-	QVector<QString>	comment;
+	QStringList	comment;
 	int							index;
 };
 
@@ -34,42 +34,42 @@ struct shell_t {
 	QString					title;
 	QString					shell;
 	bool					enabled;
-	QVector<QString>	comment;
+	QStringList	comment;
 	int						index;
 };
 
 struct comment_t {
-	QVector<QString>	comment;
+	QStringList	comment;
 	int index;
 };
 
 struct group_t {
 	QString title;
-	QVector<QString>	objects;
+	QStringList	objects;
 	bool				enabled;
 	int					index;
-	QVector<QString>	prerequisites;
-	QVector<QString>	postrequisites;
-	QVector<QString>	comment;
+	QStringList	prerequisites;
+	QStringList	postrequisites;
+	QStringList	comment;
 };
 
 struct package_t {
 	QString				title;
 	unsigned			packageNum;
 	QString				source;
-	QVector<QString>	install;
-	QVector<QString>	uninstall;
-	QVector<QString>	prerequisites;
-	QVector<QString>	postrequisites;
+	QStringList	install;
+	QStringList	uninstall;
+	QStringList	prerequisites;
+	QStringList	postrequisites;
 	bool				enabled;
 	QVector<int>		success;
 	int					expectedRuntime;
 	int					failedRuntime;
 	QString				shell;
-	QVector<QString>	installed;
+	QStringList	installed;
 	QString				category;
 	int					index;
-	QVector<QString>	comment;
+	QStringList	comment;
 };
 
 struct tool_t {
@@ -79,9 +79,9 @@ struct tool_t {
 	int							expectedRuntime;
 	int							failedRuntime;
 	int							index;
-	QVector<QString>	prerequisites;
-	QVector<QString>	postrequisites;
-	QVector<QString>	comment;
+	QStringList	prerequisites;
+	QStringList	postrequisites;
+	QStringList	comment;
 };
 
 struct object_t {
@@ -90,19 +90,19 @@ struct object_t {
 	bool						enabled;
 	unsigned					packageNum;
 	QString					source;
-	QVector<QString>	objects;
-	QVector<QString>	install;
-	QVector<QString>	uninstall;
-	QVector<QString>	prerequisites;
-	QVector<QString>	postrequisites;
+	QStringList	objects;
+	QStringList	install;
+	QStringList	uninstall;
+	QStringList	prerequisites;
+	QStringList	postrequisites;
 	QVector<int>			success;
 	int							expectedRuntime;
 	int							failedRuntime;
 	QString					shell;
-	QVector<QString>	installed;
+	QStringList	installed;
 	QString					category;
 	QString					command;
-	QVector<QString>	comment;
+	QStringList	comment;
 	int							index;
 };
 
@@ -126,7 +126,7 @@ public:
 
 private:
 	// Functions
-	bool parse_sList(QVector<QString> &list, const QString line, bool flag_inList); // flag_inList = false unless not finished in previous run
+	bool parse_sList(QStringList &list, const QString line, bool flag_inList); // flag_inList = false unless not finished in previous run
 	bool parse_nList(QVector<int> &list, const QString line, bool flag_inList); // flag_inList = false unless not finished in previous run
 	void print_object_t(const object_t object);
 	void load_shell(const object_t o);
@@ -136,8 +136,8 @@ private:
 	void load_comments(const object_t o);
 	void object_defaults(object_t &o);
 	// Vars
-	QVector<QString> vConfigData;
-	QVector<QString> vObjectData;
+	QStringList vConfigData;
+	QStringList vObjectData;
 	QVector<std::pair<QString, int>> vObjects;
 
 

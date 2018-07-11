@@ -21,85 +21,87 @@ Q::~Q()
 void Q::init_threads(int number) { 
 	for (int i = 0; i < number; i++) { procs.append(new Proc()); }
 }
-QVector<QString> Q::get_prerequisites(QString title) {
-	QVector<QString> list = {};
+void Q::init_tree() {
+	ui.treeWidgetJobs->clear();
+	ui.treeWidgetJobs->setColumnCount(1);
+	ui.treeWidgetJobs->setHeaderLabels(QStringList("Jobs"));
+}
+QStringList Q::get_prerequisites(QString title) {
+	QStringList list = {};
 	if (objects.groups.contains(title))
-		list = objects.groups[title].objects;
-	else if (objects.packages.contains(title))
+		list = QStringList(objects.groups[title].objects);
+	else if (objects.packages.contains(title)) {
+		package_t test = objects.packages[title];
 		list = objects.packages[title].prerequisites;
+	}
 	else if (objects.tools.contains(title))
 		list = objects.tools[title].prerequisites;
 	for (auto pre : list)
 		list += get_prerequisites(pre);
 	return list;
 }
-QVector<QString> Q::get_postrequisites(QString title) {
-	QVector<QString> list;
+QStringList Q::get_postrequisites(QString title) {
+	QStringList list;
 	if (objects.tools.contains(title))
 		list = objects.tools[title].postrequisites;
-	else if (objects.tools.contains(title))
+	else if (objects.packages.contains(title))
 		list = objects.packages[title].postrequisites;
-	else if (objects.tools.contains(title))
-		list = objects.groups[title].postrequisites;
-	for (auto pre : list)
-		list += get_postrequisites(pre);
+	for (auto post : list)
+		list += get_postrequisites(post);
 	return list;
 }
-QVector<QString> Q::get_objectOrder(QString title, int depth) {
-	if (!depth) objectList = {}; // 
+QStringList Q::set_objectOrder(QString title, int depth) {
+	if (!depth) objectList.clear();
 	depth++; 
-	QVector<QString> post = get_postrequisites(title);
-	QVector<QString> pre  = get_prerequisites(title);
+	QStringList post = get_postrequisites(title);
+	QStringList pre  = get_prerequisites(title);
+	QStringList order = pre << title << post;
+	for (auto a : order) {
+		for (auto b : order) {
+			if (a == b) {} // do nothing
+			else if ( get_postrequisites(a).contains(b) ) {
 
+			}
+			else if (get_prerequisites)
+		}
+	}
 	depth--; // if 0 then first time through
-	return pre;
+	return order;
 }
-QVector<QString> Q::get_objectList(QString title) {
-	QVector<QString> list;
-	list = get_prerequisites(title), title, get_postrequisites(title);
+QStringList Q::get_objectList(QString title) {
+	QStringList list;
+	list << get_prerequisites(title) << title << get_postrequisites(title);
 	return list;
 }
 void Q::enable() {}
 void Q::disable() {}
-void Q::add(QString title, QVector<QString>& targets, qaction_t action) {
+void Q::add(QString title, QStringList& targets, qaction_t action) {
 	q_t request;
 	request.number = requestNumber++;
 	request.title = title;
 	request.objects = get_objectList(title);
 	request.targets = targets;
 
-	//ui.treeWidgetObjects->clear();
-	ui.treeWidgetJobs->setColumnCount(1);
-	ui.treeWidgetJobs->setHeaderLabels(QStringList() << "Jobs");
-	QList<QTreeWidgetItem *> jobTreeItems;
-	QTreeWidgetItem *item;
 
 	// The Job
+	QTreeWidgetItem *jobItem;
 	QString jobText = title;
-	jobTree = new QTreeWidgetItem(ui.treeWidgetJobs);
-	jobTree->setText(0, jobText);
-	ui.treeWidgetObjects->addTopLevelItem(jobTree);
-	for (auto targety : objects.OSs.keys()) {
-		jobTree->addChild(new QTreeWidgetItem(targets));
+	QStringList objs = get_objectList(title);
+	jobItem = new QTreeWidgetItem(ui.treeWidgetJobs);
+	jobItem->setText(0, jobText);
+	ui.treeWidgetJobs->addTopLevelItem(jobItem);
+	// The targets
+	for (auto target : targets) {
+		QTreeWidgetItem *child = new QTreeWidgetItem(QStringList(target));
+		// list each object for each child
+		for (auto obj : objs) {
+			child->addChild(new QTreeWidgetItem(QStringList(obj)));
+		}
+		jobItem->addChild(child);
 	}
-}
-
 	
-	// Tools 
-	//objectTreeTools = new QTreeWidgetItem(ui.treeWidgetObjects);
-	//objectTreeTools->setText(0, "tools");
-	//ui.treeWidgetObjects->addTopLevelItem(objectTreeTools);
-	//for (auto key : objects.tools.keys()) {
-	//	objectTreeTools->addChild(new QTreeWidgetItem(QStringList(key)));
+	//ui.treeWidgetObjects->addTopLevelItem(jobTree);
+	//for (auto targety : objects.OSs.keys()) {
+	//	jobTree->addChild(new QTreeWidgetItem(targets));
 	//}
-
-	return;
 }
-
-//struct q_t {
-//	int					number;
-//	QString				title;
-//  QVector<QString>	objects;
-//	QVector<QString>	targets;
-//	qaction_t			action;
-//};

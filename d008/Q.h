@@ -16,8 +16,8 @@ enum qaction_t { RUN,STAGE,INSTALL,UNINSTALL};
 struct q_t {
 	int					number;
 	QString				title;
-	QVector<QString>	objects;
-	QVector<QString>	targets;
+	QStringList	objects;
+	QStringList	targets;
 	qaction_t			action;
 };
 
@@ -30,22 +30,24 @@ private:
 	QVector<Proc>	workers;
 	QVector<q_t>	requests;
 	Object&			objects;
-	QVector<QString> objectList;
+	QStringList objectList;
 	QVector<Proc*>	procs;
 	Ui::d008Class	&ui;
 	static unsigned	requestNumber;
-	QTreeWidgetItem *jobTree;
+	QList<QTreeWidgetItem *> jobTree;
+	QTreeWidgetItem *jobItem;
 
 public:
 	Q();
 	Q(Object &objects, Ui::d008Class &ui);
 	~Q();
 	void init_threads(int number);
-	QVector<QString> get_objectList(QString title);
-	void add(QString title, QVector<QString>& targets, qaction_t action);
-	QVector<QString> Q::get_prerequisites(QString title);
-	QVector<QString> Q::get_postrequisites(QString title);
-	QVector<QString> Q::get_objectOrder(QString title, int depth = 0);
+	void init_tree();
+	QStringList get_objectList(QString title);
+	void add(QString title, QStringList& targets, qaction_t action);
+	QStringList Q::get_prerequisites(QString title);
+	QStringList Q::get_postrequisites(QString title);
+	QStringList Q::set_objectOrder(QString title, int depth = 0);
 	void Q::enable();
 	void Q::disable();
 	

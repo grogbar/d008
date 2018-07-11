@@ -56,7 +56,7 @@ public:
 	void link_signals_and_slots(void);
 
 	// VARIABLES
-	QVector<QString> targets;
+	QStringList		targets;
 	Ui::d008Class	ui;
 	QFont			fontReg;
 	QFont			fontBold;
