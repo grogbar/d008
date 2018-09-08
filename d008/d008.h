@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QString>
 #include <QTreeWidgetItem>
+#include <qfiledialog.h>
 #include <string>
 #include <map>
 #include <iterator>
@@ -10,20 +11,26 @@
 #include <stdio.h>  /* defines FILENAME_MAX */
 #include <direct.h> 
 #include "ui_d008.h"
-#include "action.h"
+#include "Config.h"
+#include "object.h"
+#include "Q.h"
+#include "proc.h"
+#include <qdebug.h>
+
 
 struct config_t {
 	// [GENERAL]
-	std::string		currentpath;
-	std::string		binpath;
-	std::string		actionsini;
-	std::string		sourcepath;
-	std::string		stagingpath;
-	std::string		stagingunc;
-	std::string		packageroot; //	PACKAGEROOT = "$DEPLOY$-"
+	QString		currentpath;
+	QString		targetfiles;
+	QString		binpath;
+	QString		objectsini;
+	QString		sourcepath;
+	QString		stagingpath;
+	QString		stagingunc;
+	QString		packageroot; //	PACKAGEROOT = "$DEPLOY$-"
 	unsigned		packagedigits;
-	std::string		pathseparator;// = '\'
-	std::string		targetvar; // = "%TARGET%"
+	QString		pathseparator;// = '\'
+	QString		targetvar; // = "%TARGET%"
 	int				procmax; // = 4
 	// [TARGETS]
 	bool viewall = 0;
@@ -40,32 +47,50 @@ class d008 : public QMainWindow
 public:
 	d008(QWidget *parent = Q_NULLPTR);
 	int init(void);
-	int read_config(const std::string FileName);
+	int read_config();
 	int parse_config();
-	int read_targetFile(std::string FileName);
-	int write_config(const std::string FileName);
-	void load_actionTree(void);
+	int write_config();
+	int read_targetFile(QString FileName);
+	void load_objectTree(void);
+	void load_object(QString parent, QString title);
 	void link_signals_and_slots(void);
+
 	// VARIABLES
-	std::vector<std::string> targets;
-	Ui::d008Class ui;
+	QStringList		targets;
+	Ui::d008Class	ui;
+	QFont			fontReg;
+	QFont			fontBold;
+	object_t		object;
+	Config          config;
+	Object			objects;
+	Q				q = Q(objects,ui);
+	
+	QMap<QString, QString>	mConfigData;  // config.ini file 
 
 public slots:
-	void on_treeWidgetActions_itemClicked(QTreeWidgetItem* qtwitem, int i);
+	void on_treeWidgetObjects_itemSelectionChanged(void);
+	void on_listWidgetTargets_itemSelectionChanged(void);
 	//void on_actionPreferences_triggered();
-    //void on_actionActions_triggered();
+    //void on_actionObjects_triggered();
     //void on_actionAbout_triggered();
     void on_actionExit_triggered();
-    void on_pushButtonRun_clicked();
-    void on_pushButtonCancel_clicked();
     void on_lineEditCmd_textEdited(QString);
-    //void on_pushButtonProfiles_clicked();
-    //void on_pushButtonPackages_clicked();
-    //void on_pushButtonTools_clicked();
-    void on_lineEditAction_textEdited(QString);
-    //void on_treeViewActions_();
-    //void on_pushButtonAD_clicked();
-    //void on_pushButtonFiles_clicked();
+	void on_pushButtonGroups_toggled(bool checked);
+	void on_pushButtonPackages_toggled(bool checked);
+	void on_pushButtonTools_toggled(bool checked);
+	void on_pushButtonAll_toggled(bool checked);
+
+	void on_pushButtonRun_clicked();
+	void on_pushButtonCancel_clicked();
+	void on_pushButtonStage_clicked();
+	void on_pushButtonInstall_clicked();
+	void on_pushButtonUninstall_clicked();
+	void on_pushButtonLogs_clicked();
+
+	void on_lineEditObject_textChanged(QString);
+    //void on_treeViewObjects_();
+    void on_pushButtonAD_clicked();
+    void on_pushButtonFiles_clicked();
     void on_lineEditComputer_textEdited(QString);
     //void on_listViewComputers_();
     //void on_treeViewJobs_();
@@ -78,14 +103,32 @@ public slots:
 	//void on_statusBar_();
 
 
+	//QAction *actionCheck;
+	//QAction *actionStage;
+	//QAction *actionInstall;
+	//QAction *actionUninstall;
+	//QAction *actionStageInstall;
+	//QAction *actionLogs;
+	//QPushButton *pushButtonRun;
+	//QPushButton *pushButtonStage;
+	//QPushButton *pushButtonInstall;
+	//QPushButton *pushButtonUninstall;
+	//QPushButton *pushButtonLogs;
+	//QPushButton *pushButtonCancel;
+
+
+
 private:
 	//void addTreeRoot(QString name, QString description);
 	//void addTreeChild(QTreeWidgetItem *parent, QString name, QString description);
 
-	config_t config;
-	Action actions;
-	action_t action;
-	std::map<std::string, std::string>			mConfigData;  // config.ini file 
+	QTreeWidgetItem *objectTreeOSs;
+	QTreeWidgetItem *objectTreeShells;
+	QTreeWidgetItem *objectTreeGroups;
+	QTreeWidgetItem *objectTreePackages;
+	QTreeWidgetItem *objectTreeTools;
+	
+	
 
 
 

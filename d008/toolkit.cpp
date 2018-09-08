@@ -7,8 +7,7 @@ int icompare(std::string s1, std::string s2)
 	return s1.compare(s2);
 }
 
-std::string trim(const std::string& str,
-	const std::string& whitespace )
+template <typename T>T trim(const T& str,	const T& whitespace )
 {
 	const auto strBegin = str.find_first_not_of(whitespace);
 	if (strBegin == std::string::npos)
@@ -28,6 +27,7 @@ std::string GetCurrentWorkingDir(void) {
 	std::string current_working_dir(buff);
 	return current_working_dir;
 }
+
 
 std::string upper(std::string s1) {
 	std::transform(s1.begin(), s1.end(), s1.begin(), ::toupper);

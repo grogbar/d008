@@ -16,6 +16,7 @@ bool isList(std::string str) {
 		return false;
 }
 
+
 Action::Action()
 {
 	std::vector<std::string> vActionData;
@@ -45,8 +46,6 @@ int Action::write_actions(const std::string FileName) {
 	}
 	return 0;
 }
-
-int Action::parse_config() { return 0; }
 
 bool Action::parse_sList(std::vector<std::string> &list, const std::string linein, bool flag_inList) {
 	bool flag_q = false;  // '
@@ -175,16 +174,6 @@ int Action::parse_actions() {
 			case NONE:		load_comments(newObject); break;
 			}
 			
-			// testing 
-			print_action_t(newObject);
-			//testing++;
-			//if (testing > 40) {
-			//	std::cin.get();
-			//	exit(0);
-			//}
-			// testing ----end 
-
-
 			newObject = {};
 			listType = NONE;
 			inList = false;
@@ -206,22 +195,20 @@ int Action::parse_actions() {
 
 		}
 		else if ( !isList(data) ) {
+
 			if (data.at(0) == '[' && data.at(data.length()-1)==']' )  {
-				print_action_t(newObject);
-				switch (newObject.type) {
-				case TOOL:		load_tool(newObject); break;
-				case PACKAGE:	load_package(newObject); break;
-				case GROUP:		load_group(newObject); break;
-				case SHELL:		load_shell(newObject); break;
-				case COMMENT:	load_comments(newObject); break;
-				case NONE:		load_comments(newObject); break;
+				if (newObject.type != NONE) {
+					switch (newObject.type) {
+					case TOOL:		load_tool(newObject); break;
+					case PACKAGE:	load_package(newObject); break;
+					case GROUP:		load_group(newObject); break;
+					case SHELL:		load_shell(newObject); break;
+					case COMMENT:	load_comments(newObject); break;
+					}
+					newObject = {};
+					listType = NONE;
+					inList = false;
 				}
-				newObject = {};
-				listType = NONE;
-				inList = false;
-
-
-				newObject = {};
 				newObject.title = data.substr(1, data.length() - 2);
 			}
 			else if (!icompare(data.substr(0, 7), std::string("source="))) {
@@ -240,10 +227,11 @@ int Action::parse_actions() {
 				newObject.command = data.substr(9, (data.length() - 10));
 			}
 			else if (!icompare(data.substr(0, 5), std::string("type="))) {
-				if      (data.find("tool")    != std::string::npos) { newObject.type = TOOL; }
-				else if (data.find("package") != std::string::npos) { newObject.type = PACKAGE; }
-				else if (data.find("group")   != std::string::npos) { newObject.type = GROUP; }
-				else if (data.find("shell")   != std::string::npos) { newObject.type = SHELL; }
+				if      (data.find("tool")    < std::string::npos) { newObject.type = TOOL; }
+				else if (data.find("package") < std::string::npos) { newObject.type = PACKAGE; }
+				else if (data.find("group")   < std::string::npos) { newObject.type = GROUP; }
+				else if (data.find("shell")   < std::string::npos) { newObject.type = SHELL; }
+				else if (data.find("os")      < std::string::npos) { newObject.type = OS; }
 				else { newObject.type = PACKAGE; }
 			}
 			else if (!icompare(data.substr(0, 16), std::string("expectedruntime="))) {
@@ -294,12 +282,12 @@ int Action::parse_actions() {
 	}
 	// save the last object 
 	switch (newObject.type) {
-	case TOOL:		load_tool(newObject); break;
-	case PACKAGE:	load_package(newObject); break;
-	case GROUP:		load_group(newObject); break;
-	case SHELL:		load_shell(newObject); break;
-	case COMMENT:	load_comments(newObject); break;
-	case NONE:		load_comments(newObject); break;
+		case TOOL:		load_tool(newObject); break;
+		case PACKAGE:	load_package(newObject); break;
+		case GROUP:		load_group(newObject); break;
+		case SHELL:		load_shell(newObject); break;
+		case COMMENT:	load_comments(newObject); break;
+		case NONE:		load_comments(newObject); break;
 	}
 	return 0;
 }
